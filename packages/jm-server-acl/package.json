@@ -1,0 +1,23 @@
+{
+  "name": "jm-server-acl",
+  "version": "3.0.0",
+  "description": "acl plugin for jm-server",
+  "main": "./lib/index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jm-root/gateway.git"
+  },
+  "keywords": [
+    "javascript",
+    "jm-server-acl"
+  ],
+  "author": {
+    "name": "Jeff YU"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jm-root/gateway/issues"
+  },
+  "homepage": "https://github.com/jm-root/gateway",
+  "dependencies": {}
+}
