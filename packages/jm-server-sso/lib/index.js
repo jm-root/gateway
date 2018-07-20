@@ -21,6 +21,7 @@ module.exports = function (opts = {}) {
   let router = ms.router()
   app.root.use(config.prefix || '', router)
   router.use(async opts => {
+    opts.data || (opts.data = {})
     let token = opts.data[tokenKey]
     opts.headers && opts.headers[headerTokenKey] && (token = opts.headers[headerTokenKey])
     if (!token) return
@@ -30,8 +31,6 @@ module.exports = function (opts = {}) {
       let doc = await app.router.get(verifyPath, data)
       doc && !doc.err && (opts.user = doc)
       if (opts.uri === verifyPath && opts.type === 'get') return doc
-    } catch (e) {
-      console.log(e)
-    }
+    } catch (e) {}
   })
 }
