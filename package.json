@@ -10,7 +10,7 @@
   "dependencies": {
     "jm-server": "^2.0.8",
     "jm-server-config": "^3.0.0",
-    "jm-server-sso": "^3.0.0",
+    "jm-server-sso": "^3.0.1",
     "jm-server-acl": "^3.0.0"
   },
   "devDependencies": {
