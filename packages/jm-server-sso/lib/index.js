@@ -23,7 +23,17 @@ module.exports = function (opts = {}) {
   router.use(async opts => {
     opts.data || (opts.data = {})
     let token = opts.data[tokenKey]
-    opts.headers && opts.headers[headerTokenKey] && (token = opts.headers[headerTokenKey])
+    if (opts.headers && opts.headers[headerTokenKey] && (token = opts.headers[headerTokenKey])) {
+      const parts = token.split(' ')
+      if (parts.length === 2) {
+        const scheme = parts[0]
+          , credentials = parts[1]
+
+        if (/^Bearer$/i.test(scheme)) {
+          token = credentials
+        }
+      }
+    }
     if (!token) return
     let data = {}
     data[tokenKey] = token
