@@ -44,7 +44,7 @@ module.exports = function (opts) {
   })
   // ---- deprecated end ----
 
-  if (opts.acl) app.use('acl', {proxy: opts.acl})
+  if (opts.acl) app.use('acl', { proxy: opts.acl })
   let noAclUser = opts.no_acl_user || false
   let aclUserKey = opts.acl_user_key || 'acl_user'
 

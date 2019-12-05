@@ -30,7 +30,7 @@ module.exports = function (opts) {
 
   let loadProxy = async () => {
     if (opts.config) {
-      app.use('config', {proxy: opts.config})
+      app.use('config', { proxy: opts.config })
       let configRootServer = opts.config_root_server || 'server'
       try {
         let doc = await app.router.get('/config/' + configRootServer + '/modules')
@@ -42,7 +42,7 @@ module.exports = function (opts) {
       }
     }
     let gateway = opts.gateway || opts.sdk
-    if (gateway) app.use('gateway', {proxy: gateway, prefix: '/'})
+    if (gateway) app.use('gateway', { proxy: gateway, prefix: '/' })
   }
   app.on('uses', function () {
     loadProxy()

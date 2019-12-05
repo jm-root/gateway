@@ -13,7 +13,7 @@ module.exports = function (opts = {}) {
   opts.sso_token_key || (opts.sso_token_key = 'token')
   opts.sso_header_token_key || (opts.sso_header_token_key = 'authorization')
 
-  if (opts.sso) app.use('sso', {proxy: opts.sso})
+  if (opts.sso) app.use('sso', { proxy: opts.sso })
 
   let verifyPath = opts.sso_verify_path
   let tokenKey = opts.sso_token_key
@@ -27,7 +27,8 @@ module.exports = function (opts = {}) {
       const parts = token.split(' ')
       if (parts.length === 2) {
         const scheme = parts[0]
-          , credentials = parts[1]
+
+        const credentials = parts[1]
 
         if (/^Bearer$/i.test(scheme)) {
           token = credentials
