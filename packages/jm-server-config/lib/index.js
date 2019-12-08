@@ -1,5 +1,5 @@
 const log = require('jm-log4js')
-let logger = log.getLogger('gateway')
+let logger = log.getLogger('server-config')
 
 module.exports = function (opts) {
   let app = this

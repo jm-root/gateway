@@ -3,7 +3,7 @@ const log = require('jm-log4js')
 const error = require('jm-err')
 
 const ms = new MS()
-const logger = log.getLogger('jm-server')
+const logger = log.getLogger('server-acl')
 const Err = error.Err
 
 let t = function (doc, lng) {

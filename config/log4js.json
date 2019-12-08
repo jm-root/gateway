@@ -11,13 +11,17 @@
     },
     {
       "type": "dateFile",
-      "filename": "logs/server",
+      "filename": "logs/gateway",
       "pattern": "-yyyyMMdd.log",
       "alwaysIncludePattern": true,
       "category": [
         "server",
         "ms-http-server",
-        "ms-ws-server"
+        "ms-ws-server",
+        "server-acl",
+        "server-sso",
+        "server-config",
+        "server-opentracing"
       ]
     },
     {
@@ -26,5 +30,6 @@
   ],
   "replaceConsole": true,
   "levels": {
+    "console": "info"
   }
 }
