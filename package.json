@@ -31,7 +31,7 @@
   "dependencies": {
     "config": "^3.2.4",
     "jm-server": "^2.0.9",
-    "jm-server-jaeger": "^0.0.1"
+    "jm-server-jaeger": "^0.0.3"
   },
   "devDependencies": {
     "husky": "^1.2.0",
