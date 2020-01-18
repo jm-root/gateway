@@ -22,7 +22,7 @@ no_server_sso 是否禁止SSO插件, 默认不禁止, 判断是否登录用户
 
 no_server_acl 是否禁止ACL插件, 默认不禁止, 判断是否允许访问
 
-serviceName ['gateway'] 链路追踪用的服务名称, 环境变量 trace_service_name 
+service_name ['gateway'] 链路追踪用的服务名称, 环境变量 trace_service_name 
 
 jaeger jaeger服务器URI
 

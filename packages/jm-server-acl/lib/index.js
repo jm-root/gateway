@@ -25,25 +25,6 @@ module.exports = function (opts) {
     process.env[key] && (opts[key] = process.env[key])
   })
 
-  // ---- deprecated begin ----
-  const o = {
-    noAclUser: 'no_acl_user'
-  }
-  Object.keys(o).forEach(function (key) {
-    let bWarn = false
-    if (opts[key] !== undefined) {
-      opts[o[key]] = opts[key]
-      delete opts[key]
-      bWarn = true
-    }
-    if (process.env[key]) {
-      opts[o[key]] = process.env[key]
-      bWarn = true
-    }
-    bWarn && (logger.warn('%s deprecated, please use %s', key, o[key]))
-  })
-  // ---- deprecated end ----
-
   if (opts.acl) app.use('acl', { proxy: opts.acl })
   let noAclUser = opts.no_acl_user || false
   let aclUserKey = opts.acl_user_key || 'acl_user'

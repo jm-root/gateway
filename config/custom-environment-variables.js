@@ -6,7 +6,7 @@ module.exports = {
   gateway: 'gateway',
   no_server_sso: 'no_server_sso',
   no_server_acl: 'no_server_acl',
-  serviceName: 'trace_service_name',
+  service_name: 'service_name',
   modules: {
     'jm-server-jaeger': {
       config: {

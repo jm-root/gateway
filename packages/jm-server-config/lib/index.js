@@ -2,26 +2,7 @@ const log = require('jm-log4js')
 let logger = log.getLogger('server-config')
 
 module.exports = function (opts) {
-  let app = this
-
-  // ---- deprecated begin ----
-  const o = {
-    sdk: 'gateway'
-  }
-  Object.keys(o).forEach(function (key) {
-    let bWarn = false
-    if (opts[key] !== undefined) {
-      opts[o[key]] = opts[key]
-      delete opts[key]
-      bWarn = true
-    }
-    if (process.env[key]) {
-      opts[o[key]] = process.env[key]
-      bWarn = true
-    }
-    bWarn && (logger.warn('%s deprecated, please use %s', key, o[key]))
-  })
-  // ---- deprecated end ----
+  const app = this
 
   const v = ['config', 'gateway', 'config_root_server']
   v.forEach(function (key) {
