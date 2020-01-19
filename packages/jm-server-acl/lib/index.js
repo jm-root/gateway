@@ -16,46 +16,54 @@ let t = function (doc, lng) {
 }
 
 module.exports = function (opts) {
-  let app = this
-  let config = app.config
-  let debug = config.debug
+  const app = this
+  const { debug, prefix = '' } = app.config
 
-  const v = ['acl', 'no_acl_user', 'acl_user_key']
-  v.forEach(function (key) {
-    process.env[key] && (opts[key] = process.env[key])
-  })
+  const {
+    acl,
+    no_acl_user: noAclUser = false,
+    acl_user_key: aclUserKey = 'acl_user',
+    no_acl_role: noAclRole = false,
+    acl_role_key: aclRoleKey = 'acl_role'
+  } = opts
 
-  if (opts.acl) app.use('acl', { proxy: opts.acl })
-  let noAclUser = opts.no_acl_user || false
-  let aclUserKey = opts.acl_user_key || 'acl_user'
+  if (acl) app.use('acl', { proxy: acl })
 
-  let router = ms.router()
-  app.root.use(config.prefix || '', router)
+  const router = ms.router()
+  app.root.use(prefix, router)
   router.use(async opts => {
-    let userId = null
-    if (opts.user && opts.user.id) {
-      userId = opts.user.id
-      if (!noAclUser) {
-        opts.headers || (opts.headers = {})
-        opts.headers[aclUserKey] = userId
-      }
+    let { id: userId, role } = opts.user || {}
+    opts.headers || (opts.headers = {})
+    if (userId && !noAclUser) {
+      opts.headers[aclUserKey] = userId
     }
-    if (noAclUser && opts.headers && opts.headers[aclUserKey]) delete opts.headers[aclUserKey]
-    let resource = opts.uri.toLowerCase()
-    let method = opts.type
-    let data = {
-      resource: resource,
-      permissions: method
+    if (noAclUser && opts.headers[aclUserKey]) delete opts.headers[aclUserKey]
+    if (role && !noAclRole) {
+      opts.headers[aclRoleKey] = role
     }
-    userId && (data.user = userId)
-    let doc = await app.router.get('/acl/isAllowed', data)
-    if (doc && doc.ret) return
-    debug && (logger.info('Forbidden: %s %s %s', userId || 'guest', method, resource))
-    if (!opts.user) {
-      doc = Err.FA_NOAUTH
-    } else {
-      doc = Err.FA_NOPERMISSION
+    if (noAclRole && opts.headers[aclRoleKey]) delete opts.headers[aclRoleKey]
+
+    const resource = opts.uri.toLowerCase()
+    const permissions = opts.type
+    const data = {
+      resource,
+      permissions
     }
+    let checkUser = true // 如果acl支持areAnyRolesAllowed，并且role有效，则不执行isAllowed
+    if (role) {
+      try {
+        const { ret } = await app.router.get('/acl/areAnyRolesAllowed', { ...data, roles: role })
+        if (ret) return
+        checkUser = false
+        debug && (logger.info('Forbidden role: %s %s %s', role, permissions, resource))
+      } catch (e) {}
+    }
+    if (checkUser) {
+      const { ret } = await app.router.get('/acl/isAllowed', { ...data, user: userId })
+      if (ret) return
+      debug && (logger.info('Forbidden user: %s %s %s', userId || 'guest', permissions, resource))
+    }
+    let doc = opts.user ? Err.FA_NOPERMISSION : Err.FA_NOAUTH
     doc = t(doc, opts.lng)
     throw error.err(doc)
   })
