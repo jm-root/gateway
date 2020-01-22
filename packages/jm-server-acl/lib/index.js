@@ -34,21 +34,26 @@ module.exports = function (opts) {
   router.use(async opts => {
     let { id: userId, role } = opts.user || {}
     opts.headers || (opts.headers = {})
+    const { headers } = opts
+
+    delete headers[aclUserKey]
     if (userId && !noAclUser) {
-      opts.headers[aclUserKey] = userId
+      headers[aclUserKey] = userId
     }
-    if (noAclUser && opts.headers[aclUserKey]) delete opts.headers[aclUserKey]
+
+    delete headers[aclRoleKey]
     if (role && !noAclRole) {
-      opts.headers[aclRoleKey] = role
+      headers[aclRoleKey] = role
     }
-    if (noAclRole && opts.headers[aclRoleKey]) delete opts.headers[aclRoleKey]
 
     const resource = opts.uri.toLowerCase()
     const permissions = opts.type
+
     const data = {
       resource,
       permissions
     }
+
     let checkUser = true // 如果acl支持areAnyRolesAllowed，并且role有效，则不执行isAllowed
     if (role) {
       try {
@@ -58,11 +63,13 @@ module.exports = function (opts) {
         debug && (logger.info('Forbidden role: %s %s %s', role, permissions, resource))
       } catch (e) {}
     }
+
     if (checkUser) {
       const { ret } = await app.router.get('/acl/isAllowed', { ...data, user: userId })
       if (ret) return
       debug && (logger.info('Forbidden user: %s %s %s', userId || 'guest', permissions, resource))
     }
+
     let doc = opts.user ? Err.FA_NOPERMISSION : Err.FA_NOAUTH
     doc = t(doc, opts.lng)
     throw error.err(doc)
