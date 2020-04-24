@@ -6,7 +6,7 @@ const ms = new MS()
 const logger = log.getLogger('server-acl')
 const Err = error.Err
 
-let t = function (doc, lng) {
+function t (doc, lng) {
   if (doc && lng && doc.err && doc.msg) {
     return Object.assign({}, doc, {
       msg: Err.t(doc.msg, lng) || doc.msg
@@ -29,12 +29,9 @@ module.exports = function (opts) {
 
   if (acl) app.use('acl', { proxy: acl })
 
-  const router = ms.router()
-  app.root.use(prefix, router)
-  router.use(async opts => {
-    let { id: userId, role } = opts.user || {}
-    opts.headers || (opts.headers = {})
-    const { headers } = opts
+  // 检查权限
+  async function isAllowed ({ user = {}, headers, uri, type }) {
+    const { id: userId, role } = user
 
     delete headers[aclUserKey]
     if (userId && !noAclUser) {
@@ -46,8 +43,8 @@ module.exports = function (opts) {
       headers[aclRoleKey] = role
     }
 
-    const resource = opts.uri.toLowerCase()
-    const permissions = opts.type
+    const resource = uri.toLowerCase()
+    const permissions = type.toLowerCase()
 
     const data = {
       resource,
@@ -58,7 +55,7 @@ module.exports = function (opts) {
     if (role) {
       try {
         const { ret } = await app.router.get('/acl/areAnyRolesAllowed', { ...data, roles: role })
-        if (ret) return
+        if (ret) return true
         checkUser = false
         debug && (logger.info('Forbidden role: %s %s %s', role, permissions, resource))
       } catch (e) {}
@@ -66,12 +63,43 @@ module.exports = function (opts) {
 
     if (checkUser) {
       const { ret } = await app.router.get('/acl/isAllowed', { ...data, user: userId })
-      if (ret) return
+      if (ret) return true
       debug && (logger.info('Forbidden user: %s %s %s', userId || 'guest', permissions, resource))
     }
 
-    let doc = opts.user ? Err.FA_NOPERMISSION : Err.FA_NOAUTH
-    doc = t(doc, opts.lng)
+    return false
+  }
+
+  const router = ms.router()
+  app.root.use(prefix, router)
+  router.use(async opts => {
+    opts.headers || (opts.headers = {})
+    const { user, headers, uri, type, lng } = opts
+    if (headers['ignore_server_acl']) return
+
+    const ret = await isAllowed({ user, headers, uri, type })
+    if (ret) return
+
+    let doc = user ? Err.FA_NOPERMISSION : Err.FA_NOAUTH
+    doc = t(doc, lng)
     throw error.err(doc)
+  })
+
+  app.on('open', () => {
+    const { http: { root } } = app.servers
+    root.use(async (req, res, next) => {
+      const { path: uri, method: type, user, headers, lng } = req
+
+      const ret = await isAllowed({ user, headers, uri, type })
+      if (ret) {
+        headers['ignore_server_acl'] = '1'
+        return next()
+      }
+
+      let doc = user ? Err.FA_NOPERMISSION : Err.FA_NOAUTH
+      doc = t(doc, lng)
+      const err = error.err(doc)
+      res.status(err.status).send(doc)
+    })
   })
 }
