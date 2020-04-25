@@ -4,11 +4,6 @@ module.exports = function (opts = {}) {
   const app = this
   const { prefix = '' } = app.config
 
-  const v = ['sso', 'sso_verify_path', 'sso_token_key', 'sso_header_token_key']
-  v.forEach(function (key) {
-    process.env[key] && (opts[key] = process.env[key])
-  })
-
   const {
     sso,
     sso_verify_path: verifyPath = '/sso/verify',

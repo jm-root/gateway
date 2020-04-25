@@ -1,28 +1,28 @@
 const log = require('jm-log4js')
-let logger = log.getLogger('server-config')
+const logger = log.getLogger('server-config')
 
 module.exports = function (opts) {
   const app = this
 
-  const v = ['config', 'gateway', 'config_root_server']
-  v.forEach(function (key) {
-    process.env[key] && (opts[key] = process.env[key])
-  })
+  const {
+    config,
+    gateway,
+    config_root_server: configRootServer = 'server'
+  } = opts
 
-  let loadProxy = async () => {
-    if (opts.config) {
-      app.use('config', { proxy: opts.config })
-      let configRootServer = opts.config_root_server || 'server'
+  const loadProxy = async () => {
+    if (config) {
+      app.use('config', { proxy: config })
+      const uri = `/config/${configRootServer}/modules`
       try {
-        let doc = await app.router.get('/config/' + configRootServer + '/modules')
+        const doc = await app.router.get(uri)
         if (doc && doc.ret) {
           app.uses(doc.ret)
         }
       } catch (err) {
-        logger.warn('读取配置信息失败\nget /config/%s/modules\n%s', configRootServer, err.stack)
+        logger.warn(`读取配置信息失败 ${uri}\n`, err)
       }
     }
-    let gateway = opts.gateway || opts.sdk
     if (gateway) app.use('gateway', { proxy: gateway, prefix: '/' })
   }
   app.on('uses', function () {
