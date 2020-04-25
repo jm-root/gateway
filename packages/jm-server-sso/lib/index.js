@@ -40,7 +40,10 @@ module.exports = function (opts = {}) {
   app.root.use(prefix, router)
   router.use(async opts => {
     const { data = {}, headers = {}, uri, type } = opts
-    if (headers['ignore_server_sso']) return
+    if (headers['ignore_server_sso']) {
+      delete headers['ignore_server_sso']
+      return
+    }
     const token = getToken(data, headers)
     if (token) {
       try {

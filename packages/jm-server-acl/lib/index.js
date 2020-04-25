@@ -75,7 +75,10 @@ module.exports = function (opts) {
   router.use(async opts => {
     opts.headers || (opts.headers = {})
     const { user, headers, uri, type, lng } = opts
-    if (headers['ignore_server_acl']) return
+    if (headers['ignore_server_acl']) {
+      delete headers['ignore_server_acl']
+      return
+    }
 
     const ret = await isAllowed({ user, headers, uri, type })
     if (ret) return
