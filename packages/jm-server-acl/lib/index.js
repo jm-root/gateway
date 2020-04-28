@@ -54,16 +54,16 @@ module.exports = function (opts) {
     let checkUser = true // 如果acl支持areAnyRolesAllowed，并且role有效，则不执行isAllowed
     if (role) {
       try {
-        const { ret } = await app.router.get('/acl/areAnyRolesAllowed', { ...data, roles: role })
-        if (ret) return true
+        const doc = await app.router.get('/acl/areAnyRolesAllowed', { ...data, roles: role })
+        if (doc && doc.ret) return true
         checkUser = false
         debug && (logger.info('Forbidden role: %s %s %s', role, permissions, resource))
       } catch (e) {}
     }
 
     if (checkUser) {
-      const { ret } = await app.router.get('/acl/isAllowed', { ...data, user: userId })
-      if (ret) return true
+      const doc = await app.router.get('/acl/isAllowed', { ...data, user: userId })
+      if (doc && doc.ret) return true
       debug && (logger.info('Forbidden user: %s %s %s', userId || 'guest', permissions, resource))
     }
 
