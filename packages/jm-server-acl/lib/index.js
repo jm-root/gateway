@@ -1,8 +1,7 @@
-const MS = require('jm-ms-core')
+const { ms } = require('jm-server')
 const log = require('jm-log4js')
 const error = require('jm-err')
 
-const ms = new MS()
 const logger = log.getLogger('server-acl')
 const Err = error.Err
 
@@ -62,9 +61,11 @@ module.exports = function (opts) {
     }
 
     if (checkUser) {
-      const doc = await app.router.get('/acl/isAllowed', { ...data, user: userId })
-      if (doc && doc.ret) return true
-      debug && (logger.info('Forbidden user: %s %s %s', userId || 'guest', permissions, resource))
+      try {
+        const doc = await app.router.get('/acl/isAllowed', { ...data, user: userId })
+        if (doc && doc.ret) return true
+        debug && (logger.info('Forbidden user: %s %s %s', userId || 'guest', permissions, resource))
+      } catch (e) {}
     }
 
     return false
