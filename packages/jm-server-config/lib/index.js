@@ -10,12 +10,7 @@ module.exports = function (opts) {
     config_root_server: configRootServer = 'server'
   } = opts
 
-  const doc = {
-    ready: false
-  }
-
   const loadProxy = async () => {
-    let ready = true
     if (config) {
       app.use('config', { proxy: config })
       const uri = `/config/${configRootServer}/modules`
@@ -25,16 +20,13 @@ module.exports = function (opts) {
           app.uses(doc.ret)
         }
       } catch (err) {
-        ready = false
-        logger.warn(`读取配置信息失败 ${uri}\n`, err)
+        logger.error(`读取配置信息失败 ${uri}\n`, err)
+        process.exit()
       }
     }
     if (gateway) app.use('gateway', { proxy: gateway, prefix: '/' })
-    doc.ready = ready
   }
   app.on('uses', function () {
     loadProxy()
   })
-
-  return doc
 }
