@@ -7,6 +7,7 @@ module.exports = {
         config_root_server: 'gateway'
       }
     },
+    'jm-server-jaeger': {},
     'jm-server-sso': {},
     'jm-server-acl': {}
   }
